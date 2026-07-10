@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Copilot</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,sans-serif;background:#fafafa;color:#1a1a2e;-webkit-text-size-adjust:100%}
+.page{min-height:100vh;min-height:100dvh;display:flex;justify-content:center;align-items:flex-start;padding:32px 16px}
+.card{max-width:500px;width:100%}
+h1{font-size:26px;font-weight:800;letter-spacing:-0.03em;color:#111;margin-bottom:2px}
+.sub{font-size:14px;color:#888;margin-bottom:24px}
+.lbl{display:block;font-size:12px;font-weight:600;color:#444;margin-bottom:5px;margin-top:16px}
+.dim{font-weight:400;color:#bbb;margin-left:4px}
+input[type=password],input[type=text]{width:100%;padding:10px 12px;font-size:15px;border:1.5px solid #ddd;border-radius:10px;background:#fff;color:#111;outline:none}
+textarea{width:100%;padding:10px 12px;font-size:14px;border:1.5px solid #ddd;border-radius:10px;background:#fff;color:#111;outline:none;resize:vertical;line-height:1.5}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{padding:6px 14px;font-size:13px;font-weight:500;border:1.5px solid #e0e0e0;border-radius:20px;background:#fff;color:#666;cursor:pointer;display:flex;align-items:center;gap:4px}
+.chip.on{border-color:#6366f1;background:#f0f0ff;color:#4338ca;font-weight:600}
+.chip-sub{font-size:11px;color:#aaa;font-weight:400}
+.spk-row{display:flex;gap:10px}
+.spk-col{flex:1}
+.spk-lbl{font-size:11px;color:#aaa;display:block;margin-bottom:3px}
+.spk-inp{width:100%;padding:8px 10px;font-size:13px;border:1.5px solid #ddd;border-radius:8px;background:#fff;color:#111;outline:none}
+.rng{display:flex;justify-content:space-between;font-size:10px;color:#ccc;margin-top:2px}
+input[type=range]{width:100%;accent-color:#6366f1}
+.drop{border:2px dashed #ddd;border-radius:10px;padding:18px;text-align:center;cursor:pointer;font-size:13px;color:#bbb;background:#fafafa}
+.drop.over{border-color:#6366f1;background:#f8f7ff}
+.f-list{margin-top:6px}
+.f-row{display:flex;align-items:center;gap:6px;padding:3px 0;font-size:12px}
+.f-name{flex:1;font-weight:500;color:#555;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.f-sz{font-size:10px;color:#bbb}
+.f-rm{background:none;border:none;color:#ccc;cursor:pointer;font-size:13px;padding:2px 5px}
+.f-tot{font-size:11px;color:#aaa;margin-top:4px}
+.go-btn{width:100%;margin-top:20px;padding:13px;font-size:15px;font-weight:600;color:#fff;background:#6366f1;border:none;border-radius:12px;cursor:pointer}
+.go-btn:disabled{opacity:0.3}
+.priv{font-size:10px;color:#ccc;text-align:center;margin-top:10px}
+
+/* Live */
+.live{height:100vh;height:100dvh;display:flex;flex-direction:column;background:#fafafa}
+.bar{display:flex;justify-content:space-between;align-items:center;padding:6px 12px;border-bottom:1px solid #eee;flex-shrink:0;flex-wrap:wrap;gap:4px}
+.bL{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.bR{display:flex;align-items:center;gap:4px}
+.bTitle{font-size:13px;font-weight:700}
+.bDot{width:7px;height:7px;border-radius:50%;transition:all 0.2s;display:inline-block}
+.bSt{font-size:11px;color:#aaa}
+.badge{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:500}
+.badge-mem{color:#6366f1;background:#f0f0ff}
+.badge-warn{color:#dc2626;background:#fef2f2;font-weight:600}
+.badge-dim{color:#999;background:#f0f0f0;padding:2px 6px;border-radius:8px;font-size:10px}
+.bBtn{width:32px;height:32px;font-size:14px;color:#888;background:#f0f0f0;border:none;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.bGo{width:32px;height:32px;font-size:12px;color:#fff;background:#6366f1;border:none;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.bStop{width:32px;height:32px;font-size:12px;color:#fff;background:#ef4444;border:none;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.err-bar{padding:5px 12px;font-size:11px;color:#dc2626;background:#fef2f2;border-bottom:1px solid #fee2e2;display:flex;justify-content:space-between;align-items:center}
+.warn-bar{padding:6px 12px;font-size:12px;color:#92400e;background:#fffbeb;border-bottom:1px solid #fef3c7;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.dead-bar{padding:6px 12px;font-size:12px;color:#dc2626;background:#fef2f2;border-bottom:1px solid #fee2e2;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.warn-btn{padding:3px 10px;font-size:11px;font-weight:600;color:#4338ca;background:#e0e7ff;border:none;border-radius:6px;cursor:pointer}
+.err-x{background:none;border:none;color:#f87171;cursor:pointer}
+.body{flex:1;display:flex;overflow:hidden}
+.tPanel{flex:0 0 38%;border-right:1px solid #eee;display:flex;flex-direction:column}
+.scroll{flex:1;overflow-y:auto;padding:10px 12px}
+.sPanel{flex:1;display:flex;flex-direction:column}
+.tLine{font-size:13px;line-height:1.55;margin-bottom:5px;color:#555}
+.tTs{font-size:9px;color:#ccc;margin-right:6px;font-variant-numeric:tabular-nums}
+.sCard{padding:8px 12px;background:#fff;border-radius:10px;margin-bottom:6px;border-left:3px solid #6366f1;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.sLine{font-size:14px;line-height:1.5;color:#2a2a4a;white-space:pre-wrap}
+.sLine.them{color:#7c3aed;font-size:12px;font-weight:500;margin-bottom:1px}
+.sLine.suggest{color:#1a1a3a;font-weight:500}
+.sSt{font-size:9px;color:#c8c8d8;margin-top:3px}
+.ph{font-size:13px;color:#ccc;font-style:italic}
+.hidden{display:none}
+</style>
+</head>
+<body>
+
+<!-- SETUP SCREEN -->
+<div id="setup" class="page">
+<div class="card">
+<h1>Copilot</h1>
+<p class="sub">Real-time AI for live conversations.</p>
+
+<label class="lbl" style="margin-top:0">API Key</label>
+<input type="password" id="apiKey" placeholder="sk-ant-...">
+
+<label class="lbl">Mode</label>
+<div class="chips" id="modeChips"></div>
+
+<label class="lbl">Speakers</label>
+<div class="spk-row">
+<div class="spk-col"><span class="spk-lbl">You</span><input type="text" id="youLabel" class="spk-inp"></div>
+<div class="spk-col"><span class="spk-lbl">Them</span><input type="text" id="themLabel" class="spk-inp"></div>
+</div>
+
+<label class="lbl">Verbosity</label>
+<div class="chips" id="verbChips"></div>
+
+<label class="lbl">Model</label>
+<div class="chips" id="modelChips"></div>
+
+<label class="lbl">Response Delay <span class="dim" id="delayVal">2s</span></label>
+<input type="range" id="delaySlider" min="1" max="4" step="0.5" value="2">
+<div class="rng"><span>1s faster</span><span>4s more context</span></div>
+
+<label class="lbl">Layout</label>
+<div class="chips" id="layoutChips"></div>
+
+<label class="lbl" style="margin-top:20px">Context <span class="dim">optional</span></label>
+<textarea id="contextBox" rows="3" placeholder="Notes, formulas, talking points..."></textarea>
+
+<label class="lbl" style="margin-top:12px">Upload Files <span class="dim">.txt .md .csv .json .py .tex</span></label>
+<div class="drop" id="dropZone">Tap to browse or drop files</div>
+<input type="file" id="fileInput" multiple accept=".txt,.md,.csv,.json,.py,.js,.tex,.html,.xml,.log,.tsv,.rst,.r,.sql" style="display:none">
+<div class="f-list" id="fileList"></div>
+
+<button class="go-btn" id="startBtn" disabled>Start Session</button>
+<p class="priv">Audio local · text to API · zero storage · auto-recovery</p>
+</div>
+</div>
+
+<!-- LIVE SCREEN -->
+<div id="live" class="live hidden">
+<div class="bar">
+<div class="bL">
+<span class="bTitle" id="liveTitle"></span>
+<span class="bDot" id="micDot"></span>
+<span class="bSt" id="micStatus">Paused</span>
+<span class="badge badge-warn hidden" id="offlineBadge">Offline</span>
+<span class="badge badge-mem hidden" id="pendingBadge">···</span>
+<span class="badge badge-mem hidden" id="summaryBadge"></span>
+<span class="badge badge-dim hidden" id="memBadge">Memory</span>
+<span class="badge badge-dim hidden" id="restartBadge"></span>
+</div>
+<div class="bR">
+<button class="bBtn" id="settingsBtn">⚙</button>
+<button class="bBtn" id="clearBtn">✕</button>
+<button class="bGo" id="listenBtn">▶</button>
+</div>
+</div>
+<div class="err-bar hidden" id="errorBar"><span id="errorText"></span><button class="err-x" id="errClose">✕</button></div>
+<div class="warn-bar hidden" id="staleBar">⚠ No audio 15s+ — check mic/speakers <button class="warn-btn" id="staleRestart">Restart</button></div>
+<div class="dead-bar hidden" id="deadBar">Mic lost <button class="warn-btn" id="deadRestart">Restart</button> <button class="warn-btn" id="deadFull">Full Reset</button></div>
+<div class="body" id="bodyPanel">
+<div class="tPanel" id="transcriptPanel"><div class="scroll" id="transcriptScroll"><p class="ph" id="tPlaceholder">Tap ▶</p></div></div>
+<div class="sPanel"><div class="scroll" id="suggestScroll"><p class="ph" id="sPlaceholder">Suggestions appear here</p></div></div>
+</div>
+</div>
+
+<script>
+// ── Config ──
+const MODES=[
+{key:"office-hours",label:"Office Hours",icon:"📚",you:"TA/Instructor",them:"Student",prompt:"You are a real-time teaching copilot. The user is a TA/instructor hosting office hours. Audio comes through laptop speakers picked up by a nearby iPad mic.\nWhen a student asks a question: give the CORRECT answer using your full knowledge PLUS any uploaded materials.\nIf the TA gives an incomplete or wrong explanation, flag it. Suggest simpler analogies when appropriate."},
+{key:"pitch",label:"Client Pitch",icon:"🎯",you:"You",them:"Client",prompt:"Real-time pitch copilot. The user is pitching to a client. Suggest answers to client questions, things to mention, and objection handling."},
+{key:"technical",label:"Technical",icon:"⚙️",you:"You",them:"Colleague",prompt:"Real-time technical copilot. Suggest solutions, flag edge cases, surface relevant concepts and best practices."},
+{key:"meeting",label:"Meeting",icon:"💬",you:"You",them:"Participant",prompt:"Real-time meeting copilot. Surface ideas, flag decisions needed, catch action items."},
+{key:"general",label:"General",icon:"◉",you:"You",them:"Other",prompt:"Real-time conversation copilot. When questions or problems arise, suggest clear solutions and answers."}
+];
+const MODELS=[{key:"claude-haiku-4-5-20251001",label:"Haiku 4.5",sub:"~1s · cheapest"},{key:"claude-sonnet-4-6",label:"Sonnet 4.6",sub:"~2s · smarter"}];
+const VERBS=[
+{key:"terse",label:"Terse",sub:"keywords only",maxTokens:80,rules:'FORMAT: Ultra-concise fragments. NO full sentences. NO filler words.\n- Max 2 lines total\n- Strip articles, "you should", "I suggest"\n- Example: "◁ Student: confused about Big-O\\n▷ O(n²) = nested loops. O(n log n) = divide & conquer. Draw call stack."'},
+{key:"brief",label:"Brief",sub:"short phrases",maxTokens:150,rules:'FORMAT: Short phrases, not full sentences. 2-3 lines max.\n- Lead with key point, skip preamble\n- No "I think", "You could" — just state it'},
+{key:"normal",label:"Normal",sub:"concise sentences",maxTokens:250,rules:"FORMAT: Concise sentences, 3-4 lines max. Complete thoughts but no padding."}
+];
+const RETRY_DELAYS=[500,1500,3000],MAX_RETRIES=3,HB_INTERVAL=5000,STALE_MS=15000;
+
+// ── State ──
+let state={mode:"office-hours",model:"claude-haiku-4-5-20251001",verb:"terse",delay:2,layout:"suggest",
+apiKey:"",context:"",files:[],customYou:"",customThem:"",
+listening:false,pending:false,micHealth:"off",restarts:0,
+transcript:[],suggestions:[],summary:"",summarizedTo:0,callCount:0,buffer:"",lastAudio:null};
+let rec=null,bufTimer=null,hbTimer=null,queue=null;
+
+// ── Helpers ──
+const $=id=>document.getElementById(id);
+const getMode=()=>MODES.find(m=>m.key===state.mode);
+const getVerb=()=>VERBS.find(v=>v.key===state.verb);
+const getYou=()=>state.customYou||getMode().you;
+const getThem=()=>state.customThem||getMode().them;
+
+function buildSuffix(){
+const v=getVerb(),y=getYou(),t=getThem();
+return `\nSPEAKER INFERENCE:\nNo speaker labels. Infer from content.\n"${y}" = user, "${t}" = other.\nPrefix:\n  ◁ ${t}: [≤8 words]\n  ▷ [suggestion]\n\n${v.rules}\n\nRULES:\n- Use FULL training knowledge + uploaded context\n- Nothing actionable → respond ONLY "—"\n- Never repeat previous suggestions\n- ONLY address latest segment\n- EVERY word must earn its place`;
+}
+
+function buildCtx(){
+let c="";
+if(state.context.trim())c+=state.context+"\n\n";
+state.files.forEach(f=>{c+=`=== ${f.name} ===\n${f.content}\n\n`;});
+return c;
+}
+
+// ── Chips ──
+function renderChips(container,items,current,onSelect,labelFn){
+container.innerHTML="";
+items.forEach(item=>{
+const b=document.createElement("button");
+b.className="chip"+(item.key===current?" on":"");
+b.innerHTML=labelFn?labelFn(item):(item.icon?item.icon+" ":"")+item.label;
+b.onclick=()=>onSelect(item.key);
+container.appendChild(b);
+});
+}
+
+function renderSetup(){
+renderChips($("modeChips"),MODES,state.mode,k=>{state.mode=k;state.customYou="";state.customThem="";renderSetup();},
+m=>m.icon+" "+m.label);
+renderChips($("verbChips"),VERBS,state.verb,k=>{state.verb=k;renderSetup();},
+v=>v.label+' <span class="chip-sub">'+v.sub+"</span>");
+renderChips($("modelChips"),MODELS,state.model,k=>{state.model=k;renderSetup();},
+m=>m.label+' <span class="chip-sub">'+m.sub+"</span>");
+renderChips($("layoutChips"),[{key:"split",label:"Split"},{key:"suggest",label:"Suggestions Only"}],state.layout,k=>{state.layout=k;renderSetup();});
+const m=getMode();
+$("youLabel").placeholder=m.you;
+$("themLabel").placeholder=m.them;
+$("startBtn").disabled=!state.apiKey;
+renderFileList();
+}
+
+function renderFileList(){
+const c=$("fileList");
+if(!state.files.length){c.innerHTML="";return;}
+let h=state.files.map((f,i)=>`<div class="f-row"><span class="f-name">${f.name}</span><span class="f-sz">${(f.size/1024).toFixed(0)}k</span><button class="f-rm" onclick="removeFile(${i})">✕</button></div>`).join("");
+const chars=state.files.reduce((a,f)=>a+f.content.length,0);
+h+=`<div class="f-tot">${state.files.length} file${state.files.length>1?"s":""} · ${(chars/1000).toFixed(0)}k chars</div>`;
+c.innerHTML=h;
+}
+
+function removeFile(i){state.files.splice(i,1);renderFileList();}
+
+async function readFiles(fileList){
+for(const f of fileList){
+try{const t=await f.text();state.files.push({name:f.name,size:f.size,content:t.slice(0,200000)});}
+catch(e){state.files.push({name:f.name,size:f.size,content:"[Unreadable]"});}
+}
+renderFileList();
+}
+
+// ── API ──
+async function callClaudeRetry(text,attempt=0){
+const recent=state.transcript.slice(-15).map(t=>t.text).join(" ");
+const ctx=buildCtx();
+const sys=getMode().prompt+buildSuffix()+(ctx?"\n\n--- CONTEXT ---\n"+ctx:"");
+let msg="";
+if(state.summary)msg+="SUMMARY:\n"+state.summary+"\n\n";
+msg+='RECENT:\n"'+recent+'"\n\nNEW:\n"'+text+'"\n\nGo.';
+try{
+const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",
+headers:{"Content-Type":"application/json","x-api-key":state.apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+body:JSON.stringify({model:state.model,max_tokens:getVerb().maxTokens,system:sys,messages:[{role:"user",content:msg}]})});
+if((r.status===429||r.status===529)&&attempt<MAX_RETRIES){await new Promise(r=>setTimeout(r,RETRY_DELAYS[attempt]));return callClaudeRetry(text,attempt+1);}
+if(!r.ok&&attempt<MAX_RETRIES){await new Promise(r=>setTimeout(r,RETRY_DELAYS[attempt]));return callClaudeRetry(text,attempt+1);}
+if(!r.ok){showError("API: "+r.status);return null;}
+const d=await r.json();
+if(d.error){showError(d.error.message);return null;}
+clearError();
+return d.content?.[0]?.text||"";
+}catch(e){
+if(attempt<MAX_RETRIES){await new Promise(r=>setTimeout(r,RETRY_DELAYS[attempt]));return callClaudeRetry(text,attempt+1);}
+showError("Network error");return null;
+}
+}
+
+async function callClaude(text){
+if(!state.apiKey||state.pending)return;
+if(state.pending){queue=text;return;}
+state.pending=true;updateBadges();
+state.callCount++;
+if(state.callCount%20===0)updateSummary();
+const out=await callClaudeRetry(text);
+if(out&&out.trim()!=="—")addSuggestion(out);
+state.pending=false;updateBadges();
+if(queue){const q=queue;queue=null;setTimeout(()=>callClaude(q),100);}
+}
+
+async function updateSummary(){
+const unsummarized=state.transcript.slice(state.summarizedTo);
+if(unsummarized.length<15)return;
+$("summaryBadge").textContent="Compressing...";$("summaryBadge").classList.remove("hidden");
+const txt=unsummarized.map(t=>t.text).join(" ");
+try{
+const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",
+headers:{"Content-Type":"application/json","x-api-key":state.apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:500,
+messages:[{role:"user",content:`Running summary between "${getYou()}" and "${getThem()}".\n${state.summary?"PREV:\n"+state.summary+"\n\n":""}NEW:\n"${txt}"\nUpdated summary under 300 words. ONLY summary.`}]})});
+const d=await r.json();
+if(d.content?.[0]?.text){state.summary=d.content[0].text;state.summarizedTo=state.transcript.length;}
+}catch{}
+$("summaryBadge").classList.add("hidden");
+updateBadges();
+}
+
+// ── UI Updates ──
+function showError(msg){$("errorText").textContent=msg;$("errorBar").classList.remove("hidden");}
+function clearError(){$("errorBar").classList.add("hidden");}
+function updateBadges(){
+$("pendingBadge").classList.toggle("hidden",!state.pending);
+$("memBadge").classList.toggle("hidden",!state.summary||state.pending);
+$("restartBadge").classList.toggle("hidden",state.restarts===0);
+$("restartBadge").textContent="↻"+state.restarts;
+$("offlineBadge").classList.toggle("hidden",navigator.onLine);
+}
+
+function addTranscript(entry){
+state.transcript.push(entry);
+$("tPlaceholder")?.remove();
+const d=document.createElement("div");d.className="tLine";
+d.innerHTML=`<span class="tTs">${entry.time}</span>${entry.text}`;
+$("transcriptScroll").appendChild(d);
+d.scrollIntoView({behavior:"smooth"});
+}
+
+function addSuggestion(text){
+const time=new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});
+state.suggestions.push({text,time});
+$("sPlaceholder")?.remove();
+const card=document.createElement("div");card.className="sCard";
+const lines=text.split("\n").filter(l=>l.trim());
+lines.forEach(line=>{
+const div=document.createElement("div");
+div.className="sLine"+(line.trim().startsWith("◁")?" them":"")+(line.trim().startsWith("▷")?" suggest":"");
+div.textContent=line;
+card.appendChild(div);
+});
+const ts=document.createElement("div");ts.className="sSt";ts.textContent=time;card.appendChild(ts);
+$("suggestScroll").appendChild(card);
+card.scrollIntoView({behavior:"smooth"});
+}
+
+function updateMicUI(){
+const dot=$("micDot"),st=$("micStatus");
+const colors={ok:"#34d399",stale:"#fbbf24",dead:"#ef4444",off:"#aaa"};
+const labels={ok:"Live",stale:"No audio",dead:"Mic lost",off:"Paused"};
+dot.style.background=colors[state.micHealth]||"#aaa";
+dot.style.boxShadow=state.micHealth==="ok"?"0 0 6px #34d39966":"none";
+st.textContent=labels[state.micHealth]||"Paused";
+st.style.color=state.micHealth==="dead"?"#ef4444":state.micHealth==="stale"?"#f59e0b":"#aaa";
+$("staleBar").classList.toggle("hidden",!(state.micHealth==="stale"&&state.listening));
+$("deadBar").classList.toggle("hidden",!(state.micHealth==="dead"&&state.listening));
+const lb=$("listenBtn");
+if(state.listening){lb.className="bStop";lb.textContent="⏸";}
+else{lb.className="bGo";lb.textContent="▶";}
+}
+
+// ── Speech ──
+function onResult(e){
+let fin="";
+for(let i=e.resultIndex;i<e.results.length;i++)if(e.results[i].isFinal)fin+=e.results[i][0].transcript+" ";
+if(!fin.trim())return;
+state.lastAudio=Date.now();state.micHealth="ok";updateMicUI();
+const entry={text:fin.trim(),time:new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit",second:"2-digit"})};
+addTranscript(entry);
+state.buffer+=" "+fin.trim();
+clearTimeout(bufTimer);
+bufTimer=setTimeout(()=>{
+if(state.buffer.trim().split(/\s+/).length>=4){callClaude(state.buffer.trim());state.buffer="";}
+},state.delay*1000);
+}
+
+function onMicError(e){
+if(e.error==="no-speech")return;
+if(e.error==="not-allowed"){state.micHealth="dead";showError("Mic access denied");updateMicUI();return;}
+state.micHealth="stale";updateMicUI();
+}
+
+function onMicEnd(){
+if(state.listening){
+setTimeout(()=>{
+if(!state.listening)return;
+try{startRec();}catch{state.micHealth="dead";showError("Mic reconnect failed");updateMicUI();}
+},100);
+}
+}
+
+function startRec(){
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+const r=new SR();r.continuous=true;r.interimResults=true;r.lang="en-US";
+r.onresult=onResult;r.onerror=onMicError;r.onend=onMicEnd;
+r.start();rec=r;
+}
+
+function startListening(){
+if(!window.SpeechRecognition&&!window.webkitSpeechRecognition){showError("Use Chrome, Edge, or Safari.");return;}
+startRec();
+state.listening=true;state.micHealth="ok";state.restarts=0;state.lastAudio=null;
+clearError();updateMicUI();updateBadges();startHeartbeat();
+}
+
+function stopListening(){
+state.listening=false;state.micHealth="off";stopHeartbeat();
+if(rec){rec.onend=null;rec.stop();rec=null;}
+clearTimeout(bufTimer);
+if(state.buffer.trim()){callClaude(state.buffer.trim());state.buffer="";}
+updateMicUI();
+}
+
+function forceRestart(){
+if(!state.listening)return;
+state.restarts++;updateBadges();
+if(rec){rec.onend=null;rec.onerror=null;try{rec.stop();}catch{}rec=null;}
+setTimeout(()=>{if(!state.listening)return;try{startRec();state.micHealth="ok";updateMicUI();}catch{state.micHealth="dead";showError("Mic restart failed");updateMicUI();}},300);
+}
+
+function startHeartbeat(){
+clearInterval(hbTimer);
+hbTimer=setInterval(()=>{
+if(!state.listening)return;
+if(!state.lastAudio){state.micHealth="ok";updateMicUI();return;}
+const gap=Date.now()-state.lastAudio;
+if(gap>STALE_MS*3){state.micHealth="dead";forceRestart();}
+else if(gap>STALE_MS)state.micHealth="stale";
+else state.micHealth="ok";
+updateMicUI();
+},HB_INTERVAL);
+}
+function stopHeartbeat(){clearInterval(hbTimer);}
+
+// ── Screen transitions ──
+function goLive(){
+state.apiKey=$("apiKey").value;
+state.context=$("contextBox").value;
+state.customYou=$("youLabel").value;
+state.customThem=$("themLabel").value;
+if(!state.apiKey)return;
+
+const m=getMode();
+$("liveTitle").textContent=m.icon+" "+getYou()+" ↔ "+getThem();
+$("transcriptPanel").classList.toggle("hidden",state.layout==="suggest");
+$("setup").classList.add("hidden");
+$("live").classList.remove("hidden");
+updateMicUI();updateBadges();
+}
+
+function goSetup(){
+stopListening();
+$("live").classList.add("hidden");
+$("setup").classList.remove("hidden");
+renderSetup();
+}
+
+function clearAll(){
+state.transcript=[];state.suggestions=[];state.summary="";state.summarizedTo=0;state.callCount=0;state.restarts=0;
+$("transcriptScroll").innerHTML='<p class="ph" id="tPlaceholder">Tap ▶</p>';
+$("suggestScroll").innerHTML='<p class="ph" id="sPlaceholder">Suggestions appear here</p>';
+updateBadges();
+}
+
+// ── Events ──
+$("apiKey").addEventListener("input",()=>{state.apiKey=$("apiKey").value;$("startBtn").disabled=!state.apiKey;});
+$("delaySlider").addEventListener("input",()=>{state.delay=+$("delaySlider").value;$("delayVal").textContent=state.delay+"s";});
+$("startBtn").addEventListener("click",goLive);
+$("settingsBtn").addEventListener("click",goSetup);
+$("clearBtn").addEventListener("click",clearAll);
+$("listenBtn").addEventListener("click",()=>{state.listening?stopListening():startListening();});
+$("errClose").addEventListener("click",clearError);
+$("staleRestart").addEventListener("click",forceRestart);
+$("deadRestart").addEventListener("click",forceRestart);
+$("deadFull").addEventListener("click",()=>{stopListening();startListening();});
+
+// File upload
+$("dropZone").addEventListener("click",()=>$("fileInput").click());
+$("dropZone").addEventListener("dragover",e=>{e.preventDefault();$("dropZone").classList.add("over");});
+$("dropZone").addEventListener("dragleave",()=>$("dropZone").classList.remove("over"));
+$("dropZone").addEventListener("drop",e=>{e.preventDefault();$("dropZone").classList.remove("over");readFiles(Array.from(e.dataTransfer.files));});
+$("fileInput").addEventListener("change",e=>{readFiles(Array.from(e.target.files));e.target.value="";});
+
+// Network
+window.addEventListener("online",()=>{$("offlineBadge").classList.add("hidden");});
+window.addEventListener("offline",()=>{$("offlineBadge").classList.remove("hidden");});
+
+// Init
+renderSetup();
+</script>
+</body>
+</html>
